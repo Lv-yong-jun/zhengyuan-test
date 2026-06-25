@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>你的正缘何时出现｜缘分测试</title>
 <style>
@@ -94,14 +95,14 @@ body{font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif;background:#fff
     <div class="meta-tag"><span>🔮</span> 10道题</div>
     <div class="meta-tag"><span>💑</span> 准到尖叫</div>
   </div>
-  <button class="start-btn" id="start-btn">开始探索我的正缘</button>
+  <button class="start-btn" id="start-btn" onclick="if(window.startQ)window.startQ();">开始探索我的正缘</button>
   <div class="start-note">仅供娱乐参考 · 结果仅供参考</div>
 </div>
 
 <!-- 题目页 -->
 <div id="quiz-screen">
   <div class="q-header">
-    <button class="q-back" id="q-back">‹</button>
+    <button class="q-back" id="q-back" onclick="window.goBack()">‹</button>
     <div class="q-step" id="q-step">1/10</div>
   </div>
   <div class="q-scroll">
@@ -113,7 +114,7 @@ body{font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif;background:#fff
     </div>
   </div>
   <div class="q-footer">
-    <button class="next-btn" id="next-btn">下一题 ›</button>
+    <button class="next-btn" id="next-btn" onclick="window.nextQ()">下一题 ›</button>
   </div>
 </div>
 
@@ -300,15 +301,17 @@ function renderQ() {
     const div = document.createElement('div');
     div.className = 'opt-item';
     div.innerHTML = '<span class="opt-icon">○</span><span class="opt-text">' + opt.text + '</span>';
-    function onOptClick() {
-      document.querySelectorAll('.opt-item').forEach(o => { o.classList.remove('selected'); o.querySelector('.opt-icon').textContent = '○'; });
-      this.classList.add('selected');
-      this.querySelector('.opt-icon').textContent = '♥';
+    var _e = E, _i = I, _e2 = E2;
+    var optIdx = '__opt_' + currentQ + '_' + idx;
+    window[optIdx] = function(el) {
+      document.querySelectorAll('.opt-item').forEach(function(o) { o.classList.remove('selected'); o.querySelector('.opt-icon').textContent = '○'; });
+      el.classList.add('selected');
+      el.querySelector('.opt-icon').textContent = '♥';
       E += opt.E; I += opt.I; E2 += opt.E2;
       document.getElementById('next-btn').classList.add('active');
-    }
-    div.addEventListener('click', onOptClick);
-    div.addEventListener('touchstart', function(e) { e.preventDefault(); onOptClick.call(this); });
+    };
+    div.setAttribute('onclick', 'window[\'' + optIdx + '\'](this)');
+    div.addEventListener('click', function() { window[optIdx](this); });
     list.appendChild(div);
   });
   document.getElementById('next-btn').classList.remove('active');
@@ -387,42 +390,36 @@ function renderResult(r) {
   showScreen('result-screen');
 }
 
-// ========== 事件绑定（微信兼容版） ==========
-function bindClick(id, handler) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.addEventListener('click', handler);
-  el.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    handler.call(this, e);
-  });
-}
-
-bindClick('start-btn', function() {
+// ========== 全局函数（微信兼容） ==========
+window.startQ = function() {
   showScreen('quiz-screen');
   renderQ();
-});
-
-bindClick('next-btn', function() {
-  if (!document.getElementById('next-btn').classList.contains('active')) return;
+};
+window.nextQ = function() {
+  var nb = document.getElementById('next-btn');
+  if (!nb.classList.contains('active')) return;
   currentQ++;
   if (currentQ < questions.length) {
     renderQ();
     document.getElementById('quiz-screen').scrollTop = 0;
   } else {
-    const r = calcResult();
+    var r = calcResult();
     renderResult(r);
   }
-});
-
-bindClick('q-back', function() {
+};
+window.goBack = function() {
   if (currentQ > 0) {
     currentQ--;
     renderQ();
   } else {
     showScreen('start-screen');
   }
-});
+};
+
+// ========== 事件绑定 ==========
+document.getElementById('start-btn').addEventListener('click', window.startQ);
+document.getElementById('next-btn').addEventListener('click', window.nextQ);
+document.getElementById('q-back').addEventListener('click', window.goBack);
 
 // 浮动爱心动画
 (function initHearts() {
