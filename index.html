@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>你的正缘何时出现｜缘分测试</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif;background:#fff5f8;color:#333;min-height:100vh;overflow-x:hidden}
+
+/* 开屏页 */
+#start-screen{position:fixed;inset:0;background:linear-gradient(160deg,#fff0f5 0%,#ffe4ef 40%,#ffd6e7 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;padding:24px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.start-hearts{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden}
+.heart{position:absolute;font-size:20px;opacity:0.3;animation:floatHeart 6s ease-in-out infinite}
+@keyframes floatHeart{0%,100%{transform:translateY(0) rotate(0deg);opacity:0.3}50%{transform:translateY(-30px) rotate(15deg);opacity:0.6}}
+.start-icon{font-size:80px;margin-bottom:20px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.start-badge{display:inline-block;background:linear-gradient(90deg,#ff6b9d,#c44569);padding:6px 22px;border-radius:50px;font-size:13px;font-weight:600;color:#fff;letter-spacing:1px;margin-bottom:24px}
+.start-title{font-size:30px;font-weight:800;text-align:center;margin-bottom:12px;background:linear-gradient(90deg,#c44569,#ff6b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% auto;line-height:1.4}
+.start-subtitle{font-size:15px;color:#888;text-align:center;margin-bottom:32px;line-height:1.8;max-width:320px}
+.start-meta{display:flex;gap:16px;margin-bottom:32px;flex-wrap:wrap;justify-content:center}
+.meta-tag{display:flex;align-items:center;gap:6px;font-size:13px;color:#999}
+.meta-tag span{font-size:20px}
+.start-btn{display:block;width:100%;max-width:300px;padding:15px 36px;background:linear-gradient(90deg,#ff6b9d,#c44569);color:#fff;border:none;border-radius:50px;font-size:17px;font-weight:700;cursor:pointer;transition:all 0.3s;letter-spacing:2px;box-shadow:0 4px 20px rgba(196,69,105,0.35)}
+.start-btn:active{transform:scale(0.96)}
+.start-note{font-size:12px;color:#bbb;margin-top:14px;text-align:center}
+
+/* 进度条 */
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#ff6b9d,#c44569);z-index:200;transition:width 0.4s ease;width:0%}
+
+/* 题目页 */
+#quiz-screen{position:fixed;inset:0;background:linear-gradient(160deg,#fff0f5 0%,#ffe4ef 40%,#ffd6e7 100%);display:none;flex-direction:column;padding:50px 16px 16px;overflow:hidden;min-height:100vh}
+.q-header{display:flex;justify-content:space-between;align-items:center;padding:0 4px;flex-shrink:0;margin-bottom:12px}
+.q-back{background:none;border:none;color:#c44569;font-size:28px;cursor:pointer;padding:8px;line-height:1}
+.q-step{font-size:13px;color:#999}
+.q-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 4px 8px}
+.q-card{background:rgba(255,255,255,0.9);border-radius:18px;padding:22px 18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(196,69,105,0.1)}
+.q-emoji{font-size:44px;text-align:center;margin-bottom:14px}
+.q-text{font-size:20px;font-weight:700;text-align:center;line-height:1.6;margin-bottom:6px;word-break:break-word;color:#333}
+.q-sub{font-size:13px;color:#999;text-align:center;margin-bottom:22px}
+.opt-list{display:flex;flex-direction:column;gap:10px}
+.opt-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:rgba(255,255,255,0.9);border:1.5px solid rgba(196,69,105,0.2);border-radius:13px;cursor:pointer;transition:all 0.25s;font-size:15px;line-height:1.55;word-break:break-word;min-height:52px;color:#333}
+.opt-item:active{transform:scale(0.985)}
+.opt-item.selected{border-color:#c44569;background:rgba(255,107,157,0.1)}
+.opt-item .opt-icon{font-size:20px;flex-shrink:0;margin-top:1px;width:24px;text-align:center}
+.opt-item .opt-text{flex:1;padding-top:1px}
+.q-footer{padding:10px 4px 0;flex-shrink:0}
+.next-btn{width:100%;padding:15px;background:linear-gradient(90deg,#ff6b9d,#c44569);color:#fff;border:none;border-radius:50px;font-size:16px;font-weight:700;cursor:pointer;opacity:0.35;transition:all 0.3s;letter-spacing:1px}
+.next-btn.active{opacity:1}
+.next-btn:active{transform:scale(0.98)}
+
+/* 结果页 */
+#result-screen{position:fixed;inset:0;background:linear-gradient(160deg,#fff0f5 0%,#ffe4ef 40%,#ffd6e7 100%);display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:32px 16px 30px;min-height:100vh}
+.res-inner{max-width:480px;margin:0 auto}
+.res-top-art{text-align:center;margin-bottom:20px}
+.res-emoji{font-size:60px;margin-bottom:10px}
+.res-badge{display:inline-block;background:linear-gradient(90deg,#ff6b9d,#c44569);padding:5px 18px;border-radius:50px;font-size:12px;font-weight:600;color:#fff;margin-bottom:18px}
+.res-title{font-size:15px;color:#999;text-align:center;margin-bottom:5px}
+.res-time{font-size:28px;font-weight:900;text-align:center;background:linear-gradient(90deg,#c44569,#ff6b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:18px;line-height:1.3}
+.res-tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:22px}
+.res-tag{padding:5px 13px;background:rgba(255,107,157,0.15);border:1px solid rgba(255,107,157,0.3);border-radius:50px;font-size:12px;color:#c44569}
+.res-card{background:rgba(255,255,255,0.9);border-radius:18px;padding:20px 18px;margin-bottom:14px;word-break:break-word;box-shadow:0 2px 12px rgba(196,69,105,0.08)}
+.res-section{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px}
+.res-section:last-child{margin-bottom:0}
+.res-icon{font-size:26px;flex-shrink:0;margin-top:1px}
+.res-label{font-size:13px;color:#999;margin-bottom:4px}
+.res-value{font-size:15px;font-weight:600;line-height:1.6;color:#333}
+.res-desc{font-size:14px;line-height:1.8;color:#666;margin-top:8px}
+.res-tip{background:linear-gradient(135deg,rgba(255,107,157,0.1),rgba(196,69,105,0.1));border-radius:14px;padding:16px;border-left:3px solid #c44569}
+.res-tip-title{font-size:14px;font-weight:700;color:#c44569;margin-bottom:8px}
+.res-tip-text{font-size:14px;color:#555;line-height:1.7}
+.share-btn{display:block;width:100%;max-width:480px;padding:15px;background:linear-gradient(90deg,#ff6b9d,#c44569);color:#fff;border:none;border-radius:50px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-top:10px;box-shadow:0 4px 20px rgba(196,69,105,0.35)}
+.share-btn:active{transform:scale(0.98)}
+.retest-btn{display:block;width:100%;max-width:480px;padding:13px;background:rgba(255,255,255,0.8);color:#c44569;border:1.5px solid rgba(196,69,105,0.3);border-radius:50px;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:1px;margin-top:10px;text-align:center}
+.retest-btn:active{transform:scale(0.98)}
+.res-footer{margin-top:24px;text-align:center;font-size:13px;color:#bbb}
+</style>
+</head>
+<body>
+
+<!-- 进度条 -->
+<div id="progress-bar"></div>
+
+<!-- 开屏页 -->
+<div id="start-screen">
+  <div class="start-hearts" id="hearts-container"></div>
+  <div class="start-icon">💕</div>
+  <div class="start-badge">❤️ 缘分测试</div>
+  <div class="start-title">你的正缘<br>何时出现？</div>
+  <div class="start-subtitle">通过性格、期待与直觉<br>测出你命中注定的那个人<br>将在什么时候来到你身边</div>
+  <div class="start-meta">
+    <div class="meta-tag"><span>⏱️</span> 约3分钟</div>
+    <div class="meta-tag"><span>🔮</span> 10道题</div>
+    <div class="meta-tag"><span>💑</span> 准到尖叫</div>
+  </div>
+  <button class="start-btn" id="start-btn">开始探索我的正缘</button>
+  <div class="start-note">仅供娱乐参考 · 结果仅供参考</div>
+</div>
+
+<!-- 题目页 -->
+<div id="quiz-screen">
+  <div class="q-header">
+    <button class="q-back" id="q-back">‹</button>
+    <div class="q-step" id="q-step">1/10</div>
+  </div>
+  <div class="q-scroll">
+    <div class="q-card">
+      <div class="q-emoji" id="q-emoji">🌸</div>
+      <div class="q-text" id="q-text">加载中...</div>
+      <div class="q-sub" id="q-sub"></div>
+      <div class="opt-list" id="opt-list"></div>
+    </div>
+  </div>
+  <div class="q-footer">
+    <button class="next-btn" id="next-btn">下一题 ›</button>
+  </div>
+</div>
+
+<!-- 结果页 -->
+<div id="result-screen">
+  <div class="res-inner" id="res-inner"></div>
+</div>
+
+<script>
+// ========== 题库 ==========
+const questions = [
+  {
+    emoji: "💭",
+    text: "你目前对感情的态度是？",
+    sub: "诚实选择最符合你内心的答案",
+    opts: [
+      { text: "相信缘分，耐心等待那个人出现", E:1, I:0, E2:1 },
+      { text: "想谈恋爱，但不想将就", E:2, I:0, E2:2 },
+      { text: "专心搞钱，感情的事顺其自然", E:0, I:1, E2:1 },
+      { text: "已经单身很久了，有点焦虑", E:0, I:2, E2:0 }
+    ]
+  },
+  {
+    emoji: "🌙",
+    text: "你理想中的恋爱是什么样子？",
+    sub: "想象最让你心动的场景",
+    opts: [
+      { text: "每天腻在一起，有说不完的话", E:1, I:0, E2:2 },
+      { text: "各自独立，相处时甜蜜又自在", E:2, I:1, E2:2 },
+      { text: "灵魂契合，互相支持和理解", E:1, I:1, E2:1 },
+      { text: "细水长流，平淡中见真情", E:0, I:2, E2:1 }
+    ]
+  },
+  {
+    emoji: "💔",
+    text: "上一段感情结束的原因是？",
+    sub: "或者你从未谈过恋爱？",
+    opts: [
+      { text: "性格不合，经常吵架", E:0, I:0, E2:0 },
+      { text: "对方不够用心，让我失望", E:1, I:1, E2:0 },
+      { text: "现实原因（异地/家庭等）", E:0, I:0, E2:1 },
+      { text: "我还没谈过恋爱/单身很久了", E:0, I:2, E2:2 }
+    ]
+  },
+  {
+    emoji: "🎯",
+    text: "你更看重对方的什么特质？",
+    sub: "选一个最看重的",
+    opts: [
+      { text: "上进心强，有事业心", E:2, I:0, E2:1 },
+      { text: "情绪稳定，性格温和", E:1, I:1, E2:2 },
+      { text: "有趣幽默，能逗你开心", E:1, I:0, E2:1 },
+      { text: "真诚踏实，给你安全感", E:0, I:2, E2:2 }
+    ]
+  },
+  {
+    emoji: "🔥",
+    text: "你对婚姻的态度是？",
+    sub: "真诚回答哦",
+    opts: [
+      { text: "渴望结婚，组建家庭", E:0, I:0, E2:2 },
+      { text: "看缘分，不强求也不抗拒", E:1, I:1, E2:1 },
+      { text: "一个人也很好，不着急", E:0, I:2, E2:1 },
+      { text: "遇到对的人就想结婚", E:1, I:0, E2:2 }
+    ]
+  },
+  {
+    emoji: "✨",
+    text: "在人群中，你通常是什么状态？",
+    sub: "回想一下平时的你",
+    opts: [
+      { text: "社交达人，到处聊天", E:2, I:0, E2:1 },
+      { text: "选择性社交，只跟熟人玩", E:1, I:1, E2:2 },
+      { text: "安静观察，不主动搭话", E:0, I:2, E2:0 },
+      { text: "看心情，时冷时热", E:1, I:1, E2:1 }
+    ]
+  },
+  {
+    emoji: "💤",
+    text: "你的睡眠习惯是？",
+    sub: "看似无关，其实有玄机",
+    opts: [
+      { text: "早睡早起，作息规律", E:0, I:1, E2:2 },
+      { text: "经常熬夜，但睡眠质量不错", E:1, I:0, E2:1 },
+      { text: "入睡困难，容易失眠", E:0, I:2, E2:0 },
+      { text: "睡得很沉，但经常做梦", E:1, I:1, E2:1 }
+    ]
+  },
+  {
+    emoji: "🎁",
+    text: "你更希望通过什么方式认识另一半？",
+    sub: "你理想中的相遇场景",
+    opts: [
+      { text: "朋友介绍，知根知底", E:1, I:1, E2:2 },
+      { text: "工作/学习中日久生情", E:2, I:0, E2:2 },
+      { text: "偶然相遇，一见钟情", E:1, I:0, E2:1 },
+      { text: "网络认识，慢慢了解", E:0, I:1, E2:1 }
+    ]
+  },
+  {
+    emoji: "⏰",
+    text: "你现在对"那个人"的期待有多强烈？",
+    sub: "凭直觉选",
+    opts: [
+      { text: "非常强烈，经常想到", E:1, I:0, E2:0 },
+      { text: "偶尔想起，顺其自然", E:1, I:1, E2:1 },
+      { text: "佛系心态，不刻意想", E:0, I:2, E2:2 },
+      { text: "已经遇到了，在发展中", E:2, I:0, E2:2 }
+    ]
+  },
+  {
+    emoji: "🌟",
+    text: "如果用一个词形容你对感情的期待？",
+    sub: "最后一个问题了",
+    opts: [
+      { text: "怦然心动", E:1, I:0, E2:1 },
+      { text: "温暖安心", E:0, I:2, E2:2 },
+      { text: "彼此成长", E:2, I:1, E2:2 },
+      { text: "细水长流", E:0, I:1, E2:1 }
+    ]
+  }
+];
+
+// ========== 结果计算 ==========
+const results = [
+  {
+    min: 0, max: 7,
+    time: "半年内",
+    tags: ["正缘将至", "高能量期"],
+    emoji: "💖",
+    scene: "可能在朋友聚会、工作场合或偶然相遇",
+    desc: "你目前处于吸引正缘的高能量状态！继续保持开放的心态，多参加社交活动，你身边的人很可能是你的正缘。TA可能已经出现在你的生活中了，注意那些对你特别真诚、细心的人。",
+    tips: ["多去新的社交场合", "对朋友介绍的人不要排斥", "注意身边默默关心你的人"]
+  },
+  {
+    min: 8, max: 13,
+    time: "1年内",
+    tags: ["缘分酝酿中", "静待花开"],
+    emoji: "🌸",
+    scene: "可能在旅行途中、学习圈子里或共同爱好群里",
+    desc: "你的正缘正在路上，预计一年内会进入你的世界。这段等待的时间不是白费的——它让你更清楚自己真正需要什么样的伴侣。TA可能是一个跟你有共同爱好或相似价值观的人。",
+    tips: ["培养兴趣爱好", "尝试学习新技能", "保持对世界的好奇心"]
+  },
+  {
+    min: 14, max: 18,
+    time: "1-2年内",
+    tags: ["成长等待期", "最好的在后面"],
+    emoji: "🌺",
+    scene: "可能在事业转折点、自我提升的圈子里",
+    desc: "正缘出现需要一点时间，这段时间建议你专注于自我成长。你越优秀，遇到的正缘质量越高。TA很可能在你事业或人生有了新阶段后出现，届时你们可以一起成长。",
+    tips: ["专注自我提升", "不要因为等待而焦虑", "多去接触优质圈子"]
+  },
+  {
+    min: 19, max: 24,
+    time: "2-3年内",
+    tags: ["命中注定", "好事多磨"],
+    emoji: "🌹",
+    scene: "可能在人生重大转折点或命运安排的特殊场合",
+    desc: "你的正缘是典型的"晚婚型"，但绝对值得等待！这类正缘往往是命中注定的相遇，来得慢但走得久。TA可能是经历过一些故事的人，更懂得珍惜。你的人生轨迹越走越宽，TA就会出现。",
+    tips: ["把精力放在事业和生活上", "不要因为年龄焦虑而将就", "相信好事多磨"]
+  }
+];
+
+// ========== 核心逻辑 ==========
+let currentQ = 0;
+let E = 0, I = 0, E2 = 0;
+
+function showScreen(id) {
+  document.querySelectorAll('#start-screen,#quiz-screen,#result-screen').forEach(s => s.style.display = 'none');
+  document.getElementById(id).style.display = id === 'start-screen' ? 'flex' : 'block';
+}
+
+function renderQ() {
+  const q = questions[currentQ];
+  document.getElementById('q-emoji').textContent = q.emoji;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-sub').textContent = q.sub;
+  document.getElementById('q-step').textContent = (currentQ + 1) + '/' + questions.length;
+  document.getElementById('progress-bar').style.width = ((currentQ) / questions.length * 100) + '%';
+
+  const list = document.getElementById('opt-list');
+  list.innerHTML = '';
+  q.opts.forEach((opt, idx) => {
+    const div = document.createElement('div');
+    div.className = 'opt-item';
+    div.innerHTML = '<span class="opt-icon">○</span><span class="opt-text">' + opt.text + '</span>';
+    div.addEventListener('click', function() {
+      document.querySelectorAll('.opt-item').forEach(o => { o.classList.remove('selected'); o.querySelector('.opt-icon').textContent = '○'; });
+      this.classList.add('selected');
+      this.querySelector('.opt-icon').textContent = '♥';
+      E += opt.E; I += opt.I; E2 += opt.E2;
+      document.getElementById('next-btn').classList.add('active');
+    });
+    list.appendChild(div);
+  });
+  document.getElementById('next-btn').classList.remove('active');
+}
+
+function calcResult() {
+  const total = E + I + E2;
+  for (let i = results.length - 1; i >= 0; i--) {
+    if (total >= results[i].min) return { ...results[i], total };
+  }
+  return { ...results[0], total };
+}
+
+function renderResult(r) {
+  const tipsHtml = r.tips.map(t => '<div style="margin-top:8px;font-size:14px;color:#666">💡 ' + t + '</div>').join('');
+  const tagsHtml = r.tags.map(t => '<span class="res-tag">'+t+'</span>').join('');
+
+  document.getElementById('res-inner').innerHTML = `
+    <div class="res-top-art">
+      <div class="res-emoji">${r.emoji}</div>
+    </div>
+    <div style="text-align:center">
+      <div class="res-badge">❤️ 你的正缘预测</div>
+      <div class="res-title">根据你的性格与期待测算</div>
+      <div class="res-time">${r.time}</div>
+      <div class="res-tags">${tagsHtml}</div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-section">
+        <div class="res-icon">🎯</div>
+        <div style="flex:1">
+          <div class="res-label">预测相遇场景</div>
+          <div class="res-value">${r.scene}</div>
+        </div>
+      </div>
+      <div class="res-desc">${r.desc}</div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-section">
+        <div class="res-icon">✨</div>
+        <div style="flex:1">
+          <div class="res-label">加速正缘到来的建议</div>
+        </div>
+      </div>
+      <div class="res-tip">
+        <div class="res-tip-title">💕 今日提示</div>
+        <div class="res-tip-text">${tipsHtml}</div>
+      </div>
+    </div>
+
+    <button class="share-btn" id="share-btn">💕 发给朋友看看</button>
+    <button class="retest-btn" id="retest-btn">🔄 重新测试</button>
+
+    <div class="res-footer">
+      测试结果仅供参考 · 缘分天注定<br>
+      © 吕勇军【平安金融科技集团】
+    </div>
+  `;
+
+  document.getElementById('share-btn').addEventListener('click', function() {
+    if (navigator.share) {
+      navigator.share({ title: '你的正缘何时出现', text: '我测出来正缘' + r.time + '出现！看看你的>>>', url: location.href });
+    } else {
+      alert('长按复制链接分享给朋友：' + location.href);
+    }
+  });
+
+  document.getElementById('retest-btn').addEventListener('click', function() {
+    currentQ = 0; E = 0; I = 0; E2 = 0;
+    document.getElementById('progress-bar').style.width = '0%';
+    showScreen('start-screen');
+  });
+
+  showScreen('result-screen');
+}
+
+// ========== 事件绑定 ==========
+document.getElementById('start-btn').addEventListener('click', function() {
+  showScreen('quiz-screen');
+  renderQ();
+});
+
+document.getElementById('next-btn').addEventListener('click', function() {
+  if (!document.getElementById('next-btn').classList.contains('active')) return;
+  currentQ++;
+  if (currentQ < questions.length) {
+    renderQ();
+    document.getElementById('quiz-screen').scrollTop = 0;
+  } else {
+    const r = calcResult();
+    renderResult(r);
+  }
+});
+
+document.getElementById('q-back').addEventListener('click', function() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQ();
+  } else {
+    showScreen('start-screen');
+  }
+});
+
+// 浮动爱心动画
+(function initHearts() {
+  const container = document.getElementById('hearts-container');
+  const emojis = ['💕', '💗', '💖', '💘', '🌸', '✨', '💫', '🌺'];
+  for (let i = 0; i < 12; i++) {
+    const el = document.createElement('div');
+    el.className = 'heart';
+    el.textContent = emojis[i % emojis.length];
+    el.style.left = Math.random() * 100 + '%';
+    el.style.top = Math.random() * 100 + '%';
+    el.style.animationDelay = Math.random() * 5 + 's';
+    el.style.fontSize = (14 + Math.random() * 14) + 'px';
+    container.appendChild(el);
+  }
+})();
+</script>
+</body>
+</html>
