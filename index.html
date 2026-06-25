@@ -300,13 +300,15 @@ function renderQ() {
     const div = document.createElement('div');
     div.className = 'opt-item';
     div.innerHTML = '<span class="opt-icon">○</span><span class="opt-text">' + opt.text + '</span>';
-    div.addEventListener('click', function() {
+    function onOptClick() {
       document.querySelectorAll('.opt-item').forEach(o => { o.classList.remove('selected'); o.querySelector('.opt-icon').textContent = '○'; });
       this.classList.add('selected');
       this.querySelector('.opt-icon').textContent = '♥';
       E += opt.E; I += opt.I; E2 += opt.E2;
       document.getElementById('next-btn').classList.add('active');
-    });
+    }
+    div.addEventListener('click', onOptClick);
+    div.addEventListener('touchstart', function(e) { e.preventDefault(); onOptClick.call(this); });
     list.appendChild(div);
   });
   document.getElementById('next-btn').classList.remove('active');
@@ -385,13 +387,23 @@ function renderResult(r) {
   showScreen('result-screen');
 }
 
-// ========== 事件绑定 ==========
-document.getElementById('start-btn').addEventListener('click', function() {
+// ========== 事件绑定（微信兼容版） ==========
+function bindClick(id, handler) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('click', handler);
+  el.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    handler.call(this, e);
+  });
+}
+
+bindClick('start-btn', function() {
   showScreen('quiz-screen');
   renderQ();
 });
 
-document.getElementById('next-btn').addEventListener('click', function() {
+bindClick('next-btn', function() {
   if (!document.getElementById('next-btn').classList.contains('active')) return;
   currentQ++;
   if (currentQ < questions.length) {
@@ -403,7 +415,7 @@ document.getElementById('next-btn').addEventListener('click', function() {
   }
 });
 
-document.getElementById('q-back').addEventListener('click', function() {
+bindClick('q-back', function() {
   if (currentQ > 0) {
     currentQ--;
     renderQ();
