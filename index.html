@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>你的正缘何时出现｜缘分测试</title>
 <style>
@@ -123,8 +124,12 @@ body{font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif;background:#fff
 </div>
 
 <script>
-// ========== 题库 ==========
-const questions = [
+// ========== 先定义全局变量和函数 ==========
+var currentQ = 0;
+var E = 0, I = 0, E2 = 0;
+
+// 题库
+var questions = [
   {
     emoji: "💭",
     text: "你目前对感情的态度是？",
@@ -237,8 +242,8 @@ const questions = [
   }
 ];
 
-// ========== 结果计算 ==========
-const results = [
+// 结果配置
+var results = [
   {
     min: 0, max: 7,
     time: "半年内",
@@ -277,156 +282,188 @@ const results = [
   }
 ];
 
-// ========== 核心逻辑 ==========
-let currentQ = 0;
-let E = 0, I = 0, E2 = 0;
-
+// ========== 核心函数定义 ==========
 function showScreen(id) {
-  document.querySelectorAll('#start-screen,#quiz-screen,#result-screen').forEach(s => s.style.display = 'none');
-  document.getElementById(id).style.display = id === 'start-screen' ? 'flex' : 'block';
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'none';
+  if (id === 'start-screen') {
+    document.getElementById('start-screen').style.display = 'flex';
+  } else {
+    document.getElementById(id).style.display = 'block';
+  }
 }
 
 function renderQ() {
-  const q = questions[currentQ];
+  var q = questions[currentQ];
   document.getElementById('q-emoji').textContent = q.emoji;
   document.getElementById('q-text').textContent = q.text;
   document.getElementById('q-sub').textContent = q.sub;
-  document.getElementById('q-step').textContent = (currentQ + 1) + '/' + questions.length;
-  document.getElementById('progress-bar').style.width = ((currentQ) / questions.length * 100) + '%';
+  document.getElementById('q-step').textContent = (currentQ + 1) + '/10';
+  document.getElementById('progress-bar').style.width = ((currentQ) / 10 * 100) + '%';
 
-  const list = document.getElementById('opt-list');
+  var list = document.getElementById('opt-list');
   list.innerHTML = '';
-  q.opts.forEach((opt, idx) => {
-    const div = document.createElement('div');
-    div.className = 'opt-item';
-    div.innerHTML = '<span class="opt-icon">○</span><span class="opt-text">' + opt.text + '</span>';
-    div.addEventListener('click', function() {
-      document.querySelectorAll('.opt-item').forEach(o => { o.classList.remove('selected'); o.querySelector('.opt-icon').textContent = '○'; });
-      this.classList.add('selected');
-      this.querySelector('.opt-icon').textContent = '♥';
-      E += opt.E; I += opt.I; E2 += opt.E2;
-      document.getElementById('next-btn').classList.add('active');
-    });
-    list.appendChild(div);
-  });
+  
+  for (var i = 0; i < q.opts.length; i++) {
+    (function(idx) {
+      var opt = q.opts[idx];
+      var div = document.createElement('div');
+      div.className = 'opt-item';
+      div.innerHTML = '<span class="opt-icon">○</span><span class="opt-text">' + opt.text + '</span>';
+      
+      div.onclick = function() {
+        // 清除所有选中
+        var items = document.querySelectorAll('.opt-item');
+        for (var j = 0; j < items.length; j++) {
+          items[j].classList.remove('selected');
+          items[j].querySelector('.opt-icon').textContent = '○';
+        }
+        // 选中当前
+        this.classList.add('selected');
+        this.querySelector('.opt-icon').textContent = '♥';
+        // 计分
+        E += opt.E;
+        I += opt.I;
+        E2 += opt.E2;
+        // 激活下一题按钮
+        document.getElementById('next-btn').classList.add('active');
+      };
+      
+      list.appendChild(div);
+    })(i);
+  }
+  
   document.getElementById('next-btn').classList.remove('active');
 }
 
 function calcResult() {
-  const total = E + I + E2;
-  for (let i = results.length - 1; i >= 0; i--) {
-    if (total >= results[i].min) return { ...results[i], total };
+  var total = E + I + E2;
+  for (var i = results.length - 1; i >= 0; i--) {
+    if (total >= results[i].min) return results[i];
   }
-  return { ...results[0], total };
+  return results[0];
 }
 
 function renderResult(r) {
-  const tipsHtml = r.tips.map(t => '<div style="margin-top:8px;font-size:14px;color:#666">💡 ' + t + '</div>').join('');
-  const tagsHtml = r.tags.map(t => '<span class="res-tag">'+t+'</span>').join('');
+  var tipsHtml = '';
+  for (var i = 0; i < r.tips.length; i++) {
+    tipsHtml += '<div style="margin-top:8px;font-size:14px;color:#666">💡 ' + r.tips[i] + '</div>';
+  }
+  
+  var tagsHtml = '';
+  for (var i = 0; i < r.tags.length; i++) {
+    tagsHtml += '<span class="res-tag">' + r.tags[i] + '</span>';
+  }
 
-  document.getElementById('res-inner').innerHTML = `
-    <div class="res-top-art">
-      <div class="res-emoji">${r.emoji}</div>
-    </div>
-    <div style="text-align:center">
-      <div class="res-badge">❤️ 你的正缘预测</div>
-      <div class="res-title">根据你的性格与期待测算</div>
-      <div class="res-time">${r.time}</div>
-      <div class="res-tags">${tagsHtml}</div>
-    </div>
-
-    <div class="res-card">
-      <div class="res-section">
-        <div class="res-icon">🎯</div>
-        <div style="flex:1">
-          <div class="res-label">预测相遇场景</div>
-          <div class="res-value">${r.scene}</div>
-        </div>
-      </div>
-      <div class="res-desc">${r.desc}</div>
-    </div>
-
-    <div class="res-card">
-      <div class="res-section">
-        <div class="res-icon">✨</div>
-        <div style="flex:1">
-          <div class="res-label">加速正缘到来的建议</div>
-        </div>
-      </div>
-      <div class="res-tip">
-        <div class="res-tip-title">💕 今日提示</div>
-        <div class="res-tip-text">${tipsHtml}</div>
-      </div>
-    </div>
-
-    <button class="share-btn" id="share-btn">💕 发给朋友看看</button>
-    <button class="retest-btn" id="retest-btn">🔄 重新测试</button>
-
-    <div class="res-footer">
-      测试结果仅供参考 · 缘分天注定<br>
-      © 吕勇军【平安金融科技集团】
-    </div>
-  `;
-
-  document.getElementById('share-btn').addEventListener('click', function() {
-    if (navigator.share) {
-      navigator.share({ title: '你的正缘何时出现', text: '我测出来正缘' + r.time + '出现！看看你的>>>', url: location.href });
-    } else {
-      alert('长按复制链接分享给朋友：' + location.href);
-    }
-  });
-
-  document.getElementById('retest-btn').addEventListener('click', function() {
-    currentQ = 0; E = 0; I = 0; E2 = 0;
-    document.getElementById('progress-bar').style.width = '0%';
-    showScreen('start-screen');
-  });
+  document.getElementById('res-inner').innerHTML = 
+    '<div class="res-top-art"><div class="res-emoji">' + r.emoji + '</div></div>' +
+    '<div style="text-align:center">' +
+      '<div class="res-badge">❤️ 你的正缘预测</div>' +
+      '<div class="res-title">根据你的性格与期待测算</div>' +
+      '<div class="res-time">' + r.time + '</div>' +
+      '<div class="res-tags">' + tagsHtml + '</div>' +
+    '</div>' +
+    '<div class="res-card">' +
+      '<div class="res-section">' +
+        '<div class="res-icon">🎯</div>' +
+        '<div style="flex:1">' +
+          '<div class="res-label">预测相遇场景</div>' +
+          '<div class="res-value">' + r.scene + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="res-desc">' + r.desc + '</div>' +
+    '</div>' +
+    '<div class="res-card">' +
+      '<div class="res-section">' +
+        '<div class="res-icon">✨</div>' +
+        '<div style="flex:1">' +
+          '<div class="res-label">加速正缘到来的建议</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="res-tip">' +
+        '<div class="res-tip-title">💕 今日提示</div>' +
+        '<div class="res-tip-text">' + tipsHtml + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<button class="share-btn" onclick="shareResult()">💕 发给朋友看看</button>' +
+    '<button class="retest-btn" onclick="retest()">🔄 重新测试</button>' +
+    '<div class="res-footer">测试结果仅供参考 · 缘分天注定<br>© 吕勇军【平安金融科技集团】</div>';
 
   showScreen('result-screen');
 }
 
-// ========== 事件绑定 ==========
-document.getElementById('start-btn').addEventListener('click', function() {
-  showScreen('quiz-screen');
-  renderQ();
-});
+function shareResult() {
+  if (navigator.share) {
+    navigator.share({
+      title: '你的正缘何时出现',
+      text: '我测出来正缘' + calcResult().time + '出现！看看你的>>>',
+      url: location.href
+    });
+  } else {
+    alert('长按复制链接分享给朋友：' + location.href);
+  }
+}
 
-document.getElementById('next-btn').addEventListener('click', function() {
+function retest() {
+  currentQ = 0;
+  E = 0;
+  I = 0;
+  E2 = 0;
+  document.getElementById('progress-bar').style.width = '0%';
+  showScreen('start-screen');
+}
+
+function nextQuestion() {
   if (!document.getElementById('next-btn').classList.contains('active')) return;
   currentQ++;
-  if (currentQ < questions.length) {
+  if (currentQ < 10) {
     renderQ();
     document.getElementById('quiz-screen').scrollTop = 0;
   } else {
-    const r = calcResult();
+    var r = calcResult();
     renderResult(r);
   }
-});
+}
 
-document.getElementById('q-back').addEventListener('click', function() {
+function goBack() {
   if (currentQ > 0) {
     currentQ--;
     renderQ();
   } else {
     showScreen('start-screen');
   }
-});
+}
 
-// 浮动爱心动画
-(function initHearts() {
-  const container = document.getElementById('hearts-container');
-  const emojis = ['💕', '💗', '💖', '💘', '🌸', '✨', '💫', '🌺'];
-  for (let i = 0; i < 12; i++) {
-    const el = document.createElement('div');
+function startQuiz() {
+  currentQ = 0;
+  E = 0;
+  I = 0;
+  E2 = 0;
+  showScreen('quiz-screen');
+  renderQ();
+}
+
+// ========== 绑定按钮事件 ==========
+window.onload = function() {
+  document.getElementById('start-btn').onclick = startQuiz;
+  document.getElementById('next-btn').onclick = nextQuestion;
+  document.getElementById('q-back').onclick = goBack;
+  
+  // 浮动爱心动画
+  var container = document.getElementById('hearts-container');
+  var emojis = ['💕', '💗', '💖', '💘', '🌸', '✨', '💫', '🌺'];
+  for (var i = 0; i < 12; i++) {
+    var el = document.createElement('div');
     el.className = 'heart';
-    el.textContent = emojis[i % emojis.length];
-    el.style.left = Math.random() * 100 + '%';
-    el.style.top = Math.random() * 100 + '%';
-    el.style.animationDelay = Math.random() * 5 + 's';
+    el.textContent = emojis[i % 8];
+    el.style.left = (Math.random() * 100) + '%';
+    el.style.top = (Math.random() * 100) + '%';
+    el.style.animationDelay = (Math.random() * 5) + 's';
     el.style.fontSize = (14 + Math.random() * 14) + 'px';
     container.appendChild(el);
   }
-})();
+};
 </script>
 </body>
 </html>
